@@ -10,8 +10,10 @@ require('dotenv').config();
 
 const app = express();
 const server = new http.Server(app);
-console.log('HIii');
 server.listen(3000);
+
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 app.use('/products', productRoute);
 app.use('/orders', orderRoute);
