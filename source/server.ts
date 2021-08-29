@@ -1,6 +1,7 @@
 
 import http from "http";
 import express from "express";
+import mongoose from "mongoose";
 
 import getAllUsersController from './controllers/getAllUsersController';
 import productRoute from './api/routes/products';
@@ -11,6 +12,12 @@ require('dotenv').config();
 const app = express();
 const server = new http.Server(app);
 server.listen(3000);
+
+mongoose.connect('mongodb+srv://siv_admin:siv_admin@ekartcluster.p8pds.mongodb.net/ekart?retryWrites=true&w=majority').then(() => {
+    console.log('Connected to database !!');
+}).catch((err) => {
+    console.log('Connection failed!' + err.message);
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
