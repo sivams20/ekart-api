@@ -5,9 +5,14 @@ import mongoose from "mongoose";
 const router = express.Router();
 
 router.get('/', (req, res, next) => {
-    res.status(200).json({
-        message: 'Handling GET request to /products'
-    });
+    Product.find()
+    .exec()
+    .then(docs=>{
+        res.status(200).json(docs);
+    })
+    .catch(err=>{
+        res.status(500).json({error: err});
+    })
 });
 
 router.post('/', (req, res, next) => {
@@ -17,25 +22,51 @@ router.post('/', (req, res, next) => {
         price: req.body.price
     });
     console.log(product);
-    product.save().then(result => {
-
+    product.save()
+    .then(result => {
+            console.log(result);
+            res.status(200).json({
+            message: 'Product Added',
+            product: product
+        })
     }).catch(err => {
-
-    });
-    res.status(200).json({
-        message: 'Product Added',
-        product: product
+        console.log(err);
+        res.status(500).json({
+            error: err
+        });
     });
 });
 
 router.get('/:productId', (req, res, next) => {
     const id = req.params.productId;
-    if (id) {
-        res.status(200).json({
-            message: 'Passed some ID',
-            id
-        });
-    }
+    Product.findById(id)
+    .exec()
+    .then(doc=>{
+        console.log(doc);
+        if(doc){
+            res.status(200).json(doc);
+        }else{
+            res.status(404).json({message: "No valid entry found for provided id"})
+        }
+    })
+    .catch(err=> {
+        console.log(err);
+        res.status(500).json({error: err});
+    });
+});
+
+router.delete("/:productId",(req, res, next)=>{
+    const id = req.params.productId;
+    Product.remove({_id: id})
+    .exec()
+    .then(result=>{
+        res.status(200).json(result);
+    })
+    .catch(err=>{
+         res.status(500).json({
+             error: err
+         })
+    })
 });
 
 export default router;
