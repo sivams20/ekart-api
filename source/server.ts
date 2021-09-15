@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import getAllUsersController from './controllers/getAllUsersController';
 import productRoute from './api/routes/products';
 import orderRoute from './api/routes/orders';
+import userRoute from './api/routes/users';
 
 require('dotenv').config();
 
@@ -28,6 +29,7 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use('/user', userRoute);
 app.use('/products', productRoute);
 app.use('/orders', orderRoute);
 app.get('/users', getAllUsersController);
