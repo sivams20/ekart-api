@@ -5,35 +5,58 @@ import * as bcrypt from 'bcrypt';
 
 const router = express.Router();
 
-router.post('signup', (req, res, next)=>{
-    console.log('signup');
-    bcrypt.hash(req.body.password, 10, (err, hash)=>{
-        if(err){
-            console.log('hash error');
-            return res.status(500).json({error: err});
+router.post('/signup', (req, res, next)=>{
+
+    User.find({email: req.body.email})
+    .exec()
+    .then(user => {
+        console.log(user);
+        if(user.length){
+            return res.status(409).json({message: "Mail already exist!"});
         }else{
-            console.log('hash success');
-            const user = new User({
-                _id: new mongoose.Types.ObjectId(),
-                email: req.body.email,
-                password: hash
-            });
-            user
-            .save()
-            .then(result=>{
-                console.log(result);
-                res.status(200).json({
-                    message: 'User Created'
-                })
-            })
-            .catch(err=>{
-                res.status(500).json({
-                    error: err
-                })
+            bcrypt.hash(req.body.password, 10, (err, hash)=>{
+                if(err){
+                    return res.status(500).json({error: err});
+                }else{
+                    const user = new User({
+                        _id: new mongoose.Types.ObjectId(),
+                        email: req.body.email,
+                        password: hash
+                    });
+                    user
+                    .save()
+                    .then(result=>{
+                        console.log(result);
+                        res.status(200).json({
+                            message: 'User Created'
+                        })
+                    })
+                    .catch(err=>{
+                        res.status(500).json({
+                            error: err
+                        })
+                    })
+                }
             })
         }
-    })
-
+    });
 });
+
+router.delete("/:userId", (req, res, next) => {
+    User.remove({ _id: req.params.userId })
+      .exec()
+      .then(result => {
+        res.status(200).json({
+          message: "User deleted"
+        });
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).json({
+          error: err
+        });
+      });
+  });
+
 
 export default router;
