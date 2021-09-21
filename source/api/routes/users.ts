@@ -2,6 +2,7 @@ import express from "express";
 import User from '../models/users';
 import mongoose from "mongoose";
 import * as bcrypt from 'bcrypt';
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
@@ -42,6 +43,38 @@ router.post('/signup', (req, res, next)=>{
     });
 });
 
+router.post('/signin', (req, res, next)=>{
+    User.find({email: req.body.email})
+    .exec()
+    .then(user=>{
+        if(user.length < 1){
+            return res.status(401).json({
+                message: "Authentication failed"
+            });
+        }
+        const hashData = user[0];
+        const password = hashData.password;
+        bcrypt.compare(req.body.password, password, (error, result)=>{
+            if(error){
+                return res.status(401).json({
+                    message: "Auth Failed"
+                });
+            }
+            if(result){
+                const token = jwt.sign({email: user[0].email, userId: user[0]._id}, 'JWT_Secret_Key',{expiresIn: "1h"});
+                return res.status(200).json({
+                    message: "Authentication Successful",
+                    token: token
+                })
+            }
+            res.status(401).json({message: "Authentication failed"});
+        });
+    })
+    .catch(err=>{
+        res.status(500).json({error: err});
+    })
+});
+
 router.delete("/:userId", (req, res, next) => {
     User.remove({ _id: req.params.userId })
       .exec()
@@ -57,6 +90,5 @@ router.delete("/:userId", (req, res, next) => {
         });
       });
   });
-
 
 export default router;
