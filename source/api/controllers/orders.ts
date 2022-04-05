@@ -58,4 +58,3 @@ const delete_order = (req, res, next)=>{
 }
 
 export {fetch_orders, fetch_order, create_order, delete_order};
-
